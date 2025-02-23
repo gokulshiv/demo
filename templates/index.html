@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crop Predictor | Advanced Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .prediction-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: 0 0 0 0.25rem rgba(46, 204, 113, 0.25);
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        .input-group-text {
+            background: rgba(46, 204, 113, 0.2);
+            border: none;
+            color: white;
+        }
+        .btn-predict {
+            background: #2ecc71;
+            border: none;
+            padding: 12px 40px;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-predict:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+        .feature-tooltip {
+            color: #2ecc71;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .section-title {
+            color: #2ecc71;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .parameter-group {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1>Smart Crop Predictor</h1>
+            <p class="lead">Advanced Agricultural Analysis System</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <div class="prediction-card">
+            <form action="{{ url_for('predict') }}" method="post" id="predictionForm">
+                <div class="parameter-group">
+                    <h3 class="section-title">Soil Nutrients</h3>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Nitrogen (N)
+                                <i class="fas fa-info-circle feature-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Optimal range: 40-80 kg/ha"></i>
+                            </label>
+                            <input type="number" step="0.01" class="form-control" name="Nitrogen" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Phosphorus (P)
+                                <i class="fas fa-info-circle feature-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Optimal range: 20-60 kg/ha"></i>
+                            </label>
+                            <input type="number" step="0.01" class="form-control" name="Phosphorus" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Potassium (K)
+                                <i class="fas fa-info-circle feature-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Optimal range: 30-70 kg/ha"></i>
+                            </label>
+                            <input type="number" step="0.01" class="form-control" name="Potassium" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="parameter-group">
+                    <h3 class="section-title">Environmental Factors</h3>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Temperature (°C)
+                                <i class="fas fa-info-circle feature-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Optimal range: 20-35°C"></i>
+                            </label>
+                            <input type="number" step="0.1" class="form-control" name="Temperature" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Humidity (%)
+                                <i class="fas fa-info-circle feature-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Optimal range: 40-80%"></i>
+                            </label>
+                            <input type="number" step="0.1" class="form-control" name="Humidity" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">pH Level
+                                <i class="fas fa-info-circle feature-tooltip" 
+                                   data-bs-toggle="tooltip" 
+                                   title="Optimal range: 6.0-7.5"></i>
+                            </label>
+                            <input type="number" step="0.1" class="form-control" name="pH" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="parameter-group">
+                    <h3 class="section-title">Agricultural Conditions</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Soil Type</label>
+                            <select class="form-control" name="Soil Type" required>
+                                <option value="">Select Soil Type</option>
+                                <option value="Clayey">Clayey</option>
+                                <option value="Silty">Silty</option>
+                                <option value="Loamy">Loamy</option>
+                                <option value="Sandy">Sandy</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Growing Season</label>
+                            <select class="form-control" name="Period of Month" required>
+                                <option value="">Select Season</option>
+                                <option value="Kharif">Kharif (Monsoon)</option>
+                                <option value="Rabi">Rabi (Winter)</option>
+                                <option value="Zaid">Zaid (Summer)</option>
+                                <option value="Annual">Annual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-predict btn-lg">
+                        <i class="fas fa-seedling me-2"></i>Predict Optimal Crop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+</body>
+</html>
