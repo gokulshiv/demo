@@ -1,0 +1,8 @@
+name: smart-crop
+service:
+  name: web
+  ports:
+    - port: 8000
+  env: python
+  buildCommand: pip install -r requirements.txt
+  runCommand: gunicorn app:app
